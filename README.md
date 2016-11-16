@@ -19,5 +19,5 @@ This kind of authorization only needs to be done once for a particular user_id.
 - The files are stored in folders corresponding to albums in Flickr. Each folder is named as the folder_id which was returned by the Flickr API. Each folder has a metadata file which contains the properties of the corresponding album as returned by the Flickr API in XML format (this includes the folder name). 
 
 - Each file is named in the following format: 
-<originalFilename>_<fileID>.<extension>
+\<originalFilename\>_<fileID>.<extension>
 Similar to folders each file has a metadata file which contains the properties of that file (this includes the original file name). 
