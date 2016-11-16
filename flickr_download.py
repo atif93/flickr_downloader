@@ -10,14 +10,28 @@ import flickrapi
 
 api_key = u'c3b794dbbff7715cbab94fc40b8ac720'
 api_secret = u'8dd1d6343917e619'
+#api_key = u'your-api-key'
+#api_secret = u'your-api-secret'
 
-#flickr = flickrapi.FlickrAPI(api_key, api_secret, format = 'parsed-json')
+nArguments = 3
+usageString = "usage: python flickr_download.py <user_id> <access_type>"
+
+if len(sys.argv)!= nArguments:
+	print usageString	
+	sys.exit()
+elif not sys.argv[2] == "private" and not sys.argv[2] == "public":
+	print "Error: access_type should be either public or private"
+	sys.exit()
+else:
+	user_id = sys.argv[1]
+	access_type = sys.argv[2]
+		
 flickr = flickrapi.FlickrAPI(api_key, api_secret)
-#photos = flickr.photos.search(user_id='128418753@N06', per_page='10')
-setsXML = flickr.photosets.getList(user_id='128418753@N06')
 
-print setsXML.attrib['stat']
-#title  = sets['photosets']['photoset'][0]['title']['_content']
+if access_type == "private":
+	flickr.authenticate_via_browser(perms='read')	
+
+setsXML = flickr.photosets.getList(user_id=user_id)
 
 if setsXML.attrib['stat'] == 'ok':
 	sets = setsXML.find('photosets').findall('photoset')
@@ -49,6 +63,5 @@ if setsXML.attrib['stat'] == 'ok':
 			print "		" + photo_name
 			
 			urllib.urlretrieve(photo_url, id + "/" + photo_name)
-		
-	
-#flickr.authenticate_via_browser(perms='read')
+else:
+	print "Flickr error"
