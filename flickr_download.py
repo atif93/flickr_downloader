@@ -2,10 +2,10 @@
 
 import urllib
 import base64
-from xml.dom import minidom
 import sys
 import os
 import flickrapi
+import xml.etree.ElementTree as ET
 
 
 api_key = u'c3b794dbbff7715cbab94fc40b8ac720'
@@ -15,6 +15,7 @@ api_secret = u'8dd1d6343917e619'
 
 nArguments = 3
 usageString = "usage: python flickr_download.py <user_id> <access_type>"
+download_folder = "flickr_downloads"
 
 if len(sys.argv)!= nArguments:
 	print usageString	
@@ -27,15 +28,16 @@ else:
 	access_type = sys.argv[2]
 		
 flickr = flickrapi.FlickrAPI(api_key, api_secret)
-
 if access_type == "private":
 	flickr.authenticate_via_browser(perms='read')	
 
+# getting all the albums of the user
 setsXML = flickr.photosets.getList(user_id=user_id)
 
 if setsXML.attrib['stat'] == 'ok':
-	sets = setsXML.find('photosets').findall('photoset')
+	sets = setsXML.findall('.//photoset')
 
+	# for each album
 	for set in sets:
 		print
 		print "             |"
@@ -44,24 +46,36 @@ if setsXML.attrib['stat'] == 'ok':
 		print
 
 		id = set.attrib['id']
-		if not os.path.exists(id):
-			os.makedirs(id)
-		photosXML = flickr.photosets.getPhotos(photoset_id=id)
-		photos = photosXML.find('photoset').findall('photo')
+		if not os.path.exists(download_folder + "/" + id):
+			os.makedirs(download_folder + "/" + id)
+		
+		# store the metadata of the album in a file
+		metadata_file = open(download_folder + "/" + id + "/" + id + '.xml','w')
+		metadata_file.write(ET.tostring(set, encoding='utf8', method='xml'))
+		metadata_file.close()
 
+		# getting the files in the album
+		photosXML = flickr.photosets.getPhotos(photoset_id=id)
+		photos = photosXML.findall('.//photo')
+
+		# for each file in the album
 		for photo in photos:
 			photo_id = photo.attrib['id']
 			
 			sizesXML = flickr.photos.getSizes(photo_id=photo_id)
-			sizes = sizesXML.find('sizes').findall('size')
+			original_size = sizesXML.find('.//size[@label="Original"]')
 
-			for size in sizes:
-				if size.attrib['label'] == 'Original':
-					photo_url = size.attrib['source']
+			photo_url = original_size.attrib['source']
 
 			photo_name = photo_url.split('/')[-1]
 			print "		" + photo_name
 			
-			urllib.urlretrieve(photo_url, id + "/" + photo_name)
+			# store the metadata of the file
+			metadata_file = open(download_folder + "/" + id + "/" + photo_name.split('.')[-2] + '.xml','w')
+			metadata_file.write(ET.tostring(photo, encoding='utf8', method='xml'))
+			metadata_file.close()
+
+			# downloading the file
+			urllib.urlretrieve(photo_url, download_folder + "/" + id + "/" + photo_name)
 else:
 	print "Flickr error"
