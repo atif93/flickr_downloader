@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import urllib
-import base64
 import sys
 import os
 import flickrapi
