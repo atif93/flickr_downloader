@@ -7,10 +7,8 @@ import flickrapi
 import xml.etree.ElementTree as ET
 
 
-api_key = u'c3b794dbbff7715cbab94fc40b8ac720'
-api_secret = u'8dd1d6343917e619'
-#api_key = u'your-api-key'
-#api_secret = u'your-api-secret'
+api_key = u'your-api-key'
+api_secret = u'your-api-secret'
 
 nArguments = 3
 usageString = "usage: python flickr_download.py <user_id> <access_type>"
